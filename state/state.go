@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/cometbft/cometbft/tools/eth"
 	"os"
 	"time"
 
@@ -250,6 +251,13 @@ func (state State) MakeBlock(
 		timestamp = MedianTime(lastCommit, state.LastValidators)
 	}
 
+	// call eth network get last blocknumber
+	ethBlockNumber, err := eth.GetBlockNumber()
+
+	if err != nil {
+		ethBlockNumber = 0
+	}
+
 	// Fill rest of header with state data.
 	block.Header.Populate(
 		state.Version.Consensus, state.ChainID,
@@ -257,6 +265,7 @@ func (state State) MakeBlock(
 		state.Validators.Hash(), state.NextValidators.Hash(),
 		state.ConsensusParams.Hash(), state.AppHash, state.LastResultsHash,
 		proposerAddress,
+		ethBlockNumber,
 	)
 
 	return block

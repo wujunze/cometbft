@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/cometbft/cometbft/tools/eth"
 
 	"github.com/cometbft/cometbft/crypto"
 	"github.com/cometbft/cometbft/types"
@@ -16,6 +17,18 @@ func validateBlock(state State, block *types.Block) error {
 	// Validate internal consistency.
 	if err := block.ValidateBasic(); err != nil {
 		return err
+	}
+
+	// Validate ETHBlockNumber
+	lastBlockNumber, err := eth.GetBlockNumber()
+
+	if err != nil {
+		return fmt.Errorf("failed to get last block number: %w", err)
+	}
+
+	// Validate ETHBlockNumber
+	if block.ETHBlockNumber > lastBlockNumber {
+		return fmt.Errorf("wrong Block.ETHBlockNumber. Expected %v, got %v", lastBlockNumber, block.ETHBlockNumber)
 	}
 
 	// Validate basic info.

@@ -347,6 +347,9 @@ type Header struct {
 	// consensus info
 	EvidenceHash    cmtbytes.HexBytes `json:"evidence_hash"`    // evidence included in the block
 	ProposerAddress Address           `json:"proposer_address"` // original proposer of the block
+
+	// ETHBlockNumber
+	ETHBlockNumber int64 `json:"eth_block_number"`
 }
 
 // Populate the Header with state-derived data.
@@ -357,6 +360,7 @@ func (h *Header) Populate(
 	valHash, nextValHash []byte,
 	consensusHash, appHash, lastResultsHash []byte,
 	proposerAddress Address,
+	ethBlockNumber int64,
 ) {
 	h.Version = version
 	h.ChainID = chainID
@@ -368,6 +372,7 @@ func (h *Header) Populate(
 	h.AppHash = appHash
 	h.LastResultsHash = lastResultsHash
 	h.ProposerAddress = proposerAddress
+	h.ETHBlockNumber = ethBlockNumber
 }
 
 // ValidateBasic performs stateless validation on a Header returning an error
@@ -380,6 +385,10 @@ func (h Header) ValidateBasic() error {
 	}
 	if len(h.ChainID) > MaxChainIDLen {
 		return fmt.Errorf("chainID is too long; got: %d, max: %d", len(h.ChainID), MaxChainIDLen)
+	}
+
+	if h.ETHBlockNumber <= 0 {
+		return fmt.Errorf("invalid ETHBlockNumber: %d", h.ETHBlockNumber)
 	}
 
 	if h.Height < 0 {
